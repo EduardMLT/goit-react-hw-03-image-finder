@@ -1,72 +1,93 @@
-import { GlobalStyle } from 'GlobalStyle';
 import { Component } from 'react';
 
-import { ContactForm } from './ContactForm/ContactForm.js';
-import { ContactList } from './ContactList/ContactList.js';
-import { Filter } from './Filter/Filter.js';
+import { GlobalStyle } from 'GlobalStyle';
 
-import { Wrapper } from './App.styled';
+import { Searchbar } from './Searchbar/Searchbar';
+import { ImageGallery } from './ImageGallery/ImageGallery';
+import { Button } from './Button/Button';
+import { fetchImages } from '../api';
+import { Loader } from './Loader/Loader';
+import { StyledApp } from './App.styled';
+import toast, { Toaster } from 'react-hot-toast';
+
+const per_page = 12;
 
 export class App extends Component {
   state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: '',
+    query: '',
+    images: [],
+    page: 1,
+    loading: false,
+    totalPages: 1,
   };
 
-  addContact = newContact => {
-    if (this.state.contacts.find(contact => contact.name === newContact.name)) {
-      alert(`${newContact.name} is already in contacts.`);
-      return;
+  async componentDidUpdate(prevProps, prevState) {
+    const { query, page } = this.state;
+
+    if (prevState.query !== query || prevState.page !== page) {
+      try {
+        this.setState({ loading: true });
+        const searchQuery = query.slice(query.indexOf('/') + 1);
+        const items = await fetchImages(searchQuery, page, per_page);
+        const { hits, total } = items;
+        const totalPages = Math.ceil(total / per_page);
+
+        if (!hits.length) {
+          toast.error('Sorry,nothing found!', {
+            duration: 2000,
+          });
+        } else {
+          this.setState(prevState => ({
+            images: page > 1 ? [...prevState.images, ...hits] : hits,
+            totalPages,
+          }));
+
+          if (page === totalPages) {
+            toast.success('That`s all images!', {
+              style: {
+                border: '1px solid #713200',
+                padding: '16px',
+                color: '#713200',
+              },
+              iconTheme: {
+                primary: '#713200',
+                secondary: '#FFFAEE',
+              },
+            });
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.setState({ loading: false });
+      }
     }
+  }
 
-    this.setState(prevState => {
-      return {
-        contacts: [...prevState.contacts, newContact],
-      };
-    });
-  };
-
-  deleteContact = cardId => {
-    this.setState(prevState => {
-      return {
-        contacts: prevState.contacts.filter(contact => contact.id !== cardId),
-      };
-    });
-  };
-
-  filterContacts = value => {
-    console.log(value);
+  changeQuery = newQuery => {
     this.setState({
-      filter: value,
+      query: `${Date.now()}/${newQuery}`,
+      images: [],
+      page: 1,
+      totalPages: 1,
     });
   };
 
-  getFilteredContactsList = () => {
-    const { contacts, filter } = this.state;
-
-    return contacts.filter(({ name }) =>
-      name.toLowerCase().includes(filter.toLowerCase())
-    );
+  handleLoadMore = () => {
+    this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
   render() {
+    const { images, loading, page, totalPages } = this.state;
     return (
-      <Wrapper>
-        <h1>Phonebook</h1>
-        <ContactForm addContact={this.addContact} />
-        <h2>Contacts</h2>
-        <Filter onFilter={this.filterContacts} />
-        <ContactList
-          contacts={this.getFilteredContactsList()}
-          onDelete={this.deleteContact}
-        />
+      <StyledApp>
+        <Searchbar onSubmit={this.changeQuery} />
+        {images.length > 0 && <ImageGallery images={images} />}
+        {loading && <Loader />}
+        {page < totalPages && <Button onClick={this.handleLoadMore} />}
+        <Toaster />
         <GlobalStyle />
-      </Wrapper>
+      </StyledApp>
     );
   }
 }
