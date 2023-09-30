@@ -1,6 +1,6 @@
 import { GalleryItemImage } from './ImageGalleryItem.styled';
 import { Component } from 'react';
-import { ModalWindow } from '../Modal/Modal.js';
+import { ModalOpen } from '../ModalOpen/ModalOpen.js';
 
 export class ImageGalleryItem extends Component {
   state = {
@@ -23,7 +23,7 @@ export class ImageGalleryItem extends Component {
           onClick={this.openModal}
         />
 
-        <ModalWindow
+        <ModalOpen
           isOpen={this.state.isModalOpen}
           closeModal={this.closeModal}
           src={largeImageURL}
