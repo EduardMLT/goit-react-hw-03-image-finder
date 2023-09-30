@@ -1,15 +1,10 @@
 import { ThreeCircles } from 'react-loader-spinner';
 
+import { LoaderDiv } from './Loader.styled.js';
+
 export const Loader = () => {
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-      }}
-    >
+    <LoaderDiv>
       <ThreeCircles
         height="100"
         width="100"
@@ -22,6 +17,6 @@ export const Loader = () => {
         innerCircleColor="#8bdfc3"
         middleCircleColor="#6aa290"
       />
-    </div>
+    </LoaderDiv>
   );
 };
