@@ -1,4 +1,4 @@
-import { Puff } from 'react-loader-spinner';
+import { ThreeCircles } from 'react-loader-spinner';
 
 export const Loader = () => {
   return (
@@ -10,15 +10,17 @@ export const Loader = () => {
         padding: '20px',
       }}
     >
-      <Puff
-        height="80"
-        width="80"
-        radius={1}
+      <ThreeCircles
+        height="100"
+        width="100"
         color="#4fa94d"
-        ariaLabel="puff-loading"
         wrapperStyle={{}}
         wrapperClass=""
         visible={true}
+        ariaLabel="three-circles-rotating"
+        outerCircleColor="#6aa290"
+        innerCircleColor="#8bdfc3"
+        middleCircleColor="#6aa290"
       />
     </div>
   );
